@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>E-Rakshak: Technical Architecture & Energy Calculation Models</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 18mm 16mm 18mm 16mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #18181b;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 10pt;
+    }
+
+    .header-banner {
+      border-bottom: 3px solid #0284c7;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 7.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .badge-primary {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    h1 {
+      font-size: 20pt;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 9.5pt;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 8.5pt;
+      color: #475569;
+    }
+
+    .meta-grid strong {
+      color: #0f172a;
+    }
+
+    h2 {
+      font-size: 13pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 14pt;
+      background: #0284c7;
+      border-radius: 2px;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      page-break-inside: avoid;
+    }
+
+    .card-title {
+      font-size: 10pt;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .formula-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-left: 4px solid #0284c7;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 8px 0 10px 0;
+      font-family: "SF Mono", Monaco, "Courier New", monospace;
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #0369a1;
+      page-break-inside: avoid;
+    }
+
+    .formula-sub {
+      font-size: 8.5pt;
+      color: #0c4a6e;
+      margin-top: 4px;
+      font-weight: normal;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 7.5pt;
+      letter-spacing: 0.05em;
+      border: 1px solid #cbd5e1;
+      padding: 6px 10px;
+      text-align: left;
+    }
+
+    td {
+      border: 1px solid #e2e8f0;
+      padding: 6px 10px;
+      color: #334155;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .callout {
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    .callout-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    .callout-warning {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      color: #92400e;
+    }
+
+    .callout-success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+      font-size: 7.5pt;
+      line-height: 1.4;
+      overflow-x: auto;
+      margin: 10px 0;
+      page-break-inside: avoid;
+    }
+
+    .example-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 9pt;
+    }
+
+    .step-num {
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: bold;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 7.5pt;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-val {
+      font-family: "SF Mono", Monaco, monospace;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 7.5pt;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: HEADER & SYSTEM ARCHITECTURE -->
+  <div class="header-banner">
+    <div class="badge-bar">
+      <span class="badge badge-primary">E-Rakshak Core</span>
+      <span class="badge">Glass-Box Physics Engine</span>
+      <span class="badge">Version 1.0</span>
+      <span class="badge badge-warning">Micro-Mobility Telematics</span>
+    </div>
+    <h1>Technical Architecture &amp; Energy Calculation Models</h1>
+    <div class="subtitle">Physics-Based EV Energy Formulations, Real-Time Routing Architecture, Glass-Box Explainability, and Safety Protocols</div>
+    
+    <div class="meta-grid">
+      <div><strong>Platform:</strong> E-Rakshak EV Safety Copilot</div>
+      <div><strong>Author:</strong> Systems Architecture Engineering Team</div>
+      <div><strong>Target Fleets:</strong> E-Rickshaws (L3/L5), E-Scooters</div>
+      <div><strong>Math Model:</strong> Deterministic Physics Model v1.0</div>
+      <div><strong>Routing Engine:</strong> TomTom Live Traffic + OSRM/ORS</div>
+      <div><strong>Backend Stack:</strong> Node.js, Express (Port 5001)</div>
+    </div>
+  </div>
+
+  <h2>1. Philosophy &amp; Glass-Box Explainability</h2>
+  <p>
+    Standard Battery Management Systems (BMS) in commercial electric micro-mobility rely on naive linear distance approximations based strictly on instantaneous battery State of Charge (SoC). In dense developing urban centers, these estimates fail severely due to unmodeled stop-and-go thermal stress, passenger overload (&gt;450 kg), and road gradients.
+  </p>
+  <p>
+    <strong>E-Rakshak</strong> replaces opaque approximations with a <strong>Glass-Box Deterministic Energy Model</strong>. Every prediction shown on the Driver Dashboard and Trip Planner is backed by verifiable physical formulas, live parameter substitution, and dynamic multi-factor stress scaling.
+  </p>
+
+  <h2>2. End-to-End System Architecture</h2>
+  <pre>
++------------------------------------------------------------------------------------------------+
+|                                    REACT 18 CLIENT LAYER (VITE)                                |
+|  - Real-Time Dashboard: Usable Range, SoC Progress, Pack Voltage, Thermal Health, Formula Modal |
+|  - Plan Trip Engine: Geocoded Search, Corridor Matrix, Live Traffic Banner, Demand Formula Modal|
+|  - Emergency SOS: Automated 0% SoC Watchdog, WhatsApp Web API Links, Emergency SMS Dispatch     |
++-----------------------------------------------+------------------------------------------------+
+                                                | HTTPS / JSON REST
++-----------------------------------------------v------------------------------------------------+
+|                               BACKEND ORCHESTRATION & SERVICES                                  |
+|                                Node.js + Express (Port 5001)                                   |
++------------------------------------------------------------------------------------------------+
+|  Controllers:                                                                                  |
+|  - GET  /api/v1/dashboard                - POST /api/v1/trips/estimate                         |
+|  - POST /api/v1/telemetry                - POST /api/v1/emergency/trigger                      |
++------------------------------------------------------------------------------------------------+
+|  Services Ecosystem:                                                                          |
+|  * RangeEstimationService : Pack energy, environmental multipliers, uncertainty intervals     |
+|  * RouteService           : TomTom Traffic Flow integration, delay calculation, OSRM routing   |
+|  * TripService            : Reachability classification, route waypoints, drive simulation     |
+|  * HazardService          : Spatial Haversine search, road obstacles, waterlogging warnings    |
+|  * EmergencyService       : Autonomous 0% SoC trigger, SMS/WhatsApp payload generator          |
+|  * SafetyRulesService     : Deterministic cutoff rules, battery thermal thresholds             |
++------------------------------------------------------------------------------------------------+
+|  External Interfaces:                                                                          |
+|  - TomTom Routing & Traffic Engine API (v2 Traffic Flow)                                       |
+|  - OpenStreetMap & Leaflet Tile Geocoding Engine                                               |
++------------------------------------------------------------------------------------------------+
+  </pre>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <h2>3. Mathematical Foundations &amp; Physics Formulations</h2>
+
+  <!-- FORMULA 1 -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 1: Usable Battery Pack Energy (E_usable)</span>
+      <span class="badge">Battery Management</span>
+    </div>
+    <p>
+      Lithium Iron Phosphate (LFP) and Lithium-ion cells cannot be depleted to 0.0V without irreversible copper shunting and degradation. The system allocates a 10% BMS safety buffer:
+    </p>
+    <div class="formula-box">
+      E_usable = C_pack × (SoC / 100) × η_usable
+      <div class="formula-sub">E_usable [Wh] = Pack Capacity [Wh] × (SoC % ÷ 100) × Usable Fraction (0.90)</div>
+    </div>
+    <p style="font-size: 8.5pt; color: #64748b;">
+      <strong>Variables:</strong> <code>C_pack</code> = Total nameplate battery capacity (e.g. 7,370 Wh for Mahindra Treo); <code>SoC</code> = Current State of Charge (%); <code>η_usable</code> = 0.90 (10% lower cutoff buffer retained by BMS).
+    </p>
+  </div>
+
+  <!-- FORMULA 2 -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 2: Dynamic Operating Energy Consumption (C_adj)</span>
+      <span class="badge">Environmental Multipliers</span>
+    </div>
+    <p>
+      Vehicle lab-certified consumption is scaled across four independent environmental and payload stress dimensions:
+    </p>
+    <div class="formula-box">
+      C_adj = C_nominal × M_load × M_temp × M_terrain × M_traffic
+      <div class="formula-sub">Adjusted Consumption [Wh/km] = Nominal Baseline × Multipliers</div>
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Multiplier</th>
+          <th>Condition / Category</th>
+          <th>Factor Value</th>
+          <th>Physical / Electrochemical Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="4"><strong>Payload (M_load)</strong></td>
+          <td>Empty / Driver only</td>
+          <td>0.88×</td>
+          <td>Reduced rolling resistance and inertial mass during acceleration.</td>
+        </tr>
+        <tr>
+          <td>Normal (1-2 Passengers)</td>
+          <td>1.00×</td>
+          <td>Standard certified operating test load.</td>
+        </tr>
+        <tr>
+          <td>Heavy (3-4 Passengers)</td>
+          <td>1.25×</td>
+          <td>Higher rolling drag and elevated mechanical powertrain strain.</td>
+        </tr>
+        <tr>
+          <td>Overloaded (&gt;450 kg Cargo)</td>
+          <td>1.55×</td>
+          <td>Severe inertial drag, tires operating under maximum rated deflection.</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Thermal (M_temp)</strong></td>
+          <td>Cold (&lt; 15°C)</td>
+          <td>1.15×</td>
+          <td>Sluggish electrolyte ion motility, elevated cell internal resistance (R_int).</td>
+        </tr>
+        <tr>
+          <td>Optimal (15°C - 42°C)</td>
+          <td>1.00×</td>
+          <td>Ideal electrochemical kinetic operating envelope.</td>
+        </tr>
+        <tr>
+          <td>Overheated (&gt; 42°C)</td>
+          <td>1.18×</td>
+          <td>Electrolyte breakdown, parasitic fan drain, elevated ohmic heat generation.</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Terrain (M_terrain)</strong></td>
+          <td>Urban Flat</td>
+          <td>1.00×</td>
+          <td>Negligible gravitational potential energy draw.</td>
+        </tr>
+        <tr>
+          <td>Rough / Broken Roads</td>
+          <td>1.15×</td>
+          <td>Continuous micro-accelerations and suspension vibration dissipation.</td>
+        </tr>
+        <tr>
+          <td>Hilly (&gt;80m Elevation Gain)</td>
+          <td>1.30×</td>
+          <td>Direct gravitational work (m·g·Δh) converted against electric motor torque.</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><strong>Traffic (M_traffic)</strong></td>
+          <td>Low / Free-Flow</td>
+          <td>1.00×</td>
+          <td>Steady-state cruising speed with minimal braking dissipation.</td>
+        </tr>
+        <tr>
+          <td>Moderate Urban</td>
+          <td>1.08×</td>
+          <td>Typical city traffic signal stops and commuter pedestrian pauses.</td>
+        </tr>
+        <tr>
+          <td>Heavy Congestion</td>
+          <td>1.22×</td>
+          <td>Frequent stop-and-go cycles maximizing I²R resistive heating in motor coils.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FORMULAS 3 & 4 -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 3 &amp; 4: Usable Range &amp; Uncertainty Intervals</span>
+      <span class="badge">Predictive Reach</span>
+    </div>
+    <div class="formula-box">
+      R_usable = E_usable ÷ C_adj
+      <div class="formula-sub">Estimated Range [km] = Usable Energy [Wh] ÷ Adjusted Rate [Wh/km]</div>
+    </div>
+    <div class="formula-box" style="margin-top: 6px;">
+      R_lower = R_usable × 0.85 &nbsp;|&nbsp; R_upper = R_usable × 1.15
+      <div class="formula-sub">Statistical Confidence Band: ±15% variance reflecting aggressive throttle, headwind, and regenerative braking recovery.</div>
+    </div>
+  </div>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <h2>4. Trip Reachability &amp; Feasibility Evaluation Matrix</h2>
+
+  <!-- FORMULA 5, 6, 7 -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 5, 6 &amp; 7: Route Energy Demand, Safety Reserve &amp; Total Budget</span>
+      <span class="badge">Route Planning</span>
+    </div>
+    <p>For any planned route of distance <strong>D</strong> (calculated via TomTom Routing Engine):</p>
+    <div class="formula-box">
+      E_demand = D [km] × C_adj [Wh/km]
+      <div class="formula-sub">Trip Energy Demand: Pure electrical draw required to reach destination</div>
+    </div>
+    <div class="formula-box" style="margin-top: 6px;">
+      E_reserve = E_usable × 0.15
+      <div class="formula-sub">Safety Reserve: 15% of available usable battery held against unmapped detours, traffic jams, and signal idling</div>
+    </div>
+    <div class="formula-box" style="margin-top: 6px;">
+      E_total = E_demand + E_reserve
+      <div class="formula-sub">Total Journey Energy Footprint</div>
+    </div>
+  </div>
+
+  <!-- FORMULA 8: VERDICT MATRIX -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 8: Reachability Verdict Classification Logic</span>
+      <span class="badge">Decision Support</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Classification Verdict</th>
+          <th>Mathematical Evaluation Condition</th>
+          <th>System Recommendation &amp; Driver Protocol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color: #16a34a;">LIKELY FEASIBLE</strong></td>
+          <td><code>E_demand + E_reserve ≤ E_usable</code></td>
+          <td>Journey is well within battery capacity with a safe buffer. Maintain standard driving profile.</td>
+        </tr>
+        <tr>
+          <td><strong style="color: #d97706;">UNCERTAIN / TIGHT MARGIN</strong></td>
+          <td><code>E_demand ≤ E_usable &lt; E_demand + E_reserve</code></td>
+          <td>Fits in battery but eats into the 15% safety reserve. Unexpected detours or traffic could strand the vehicle.</td>
+        </tr>
+        <tr>
+          <td><strong style="color: #dc2626;">NOT RECOMMENDED</strong></td>
+          <td><code>E_demand &gt; E_usable</code></td>
+          <td>Deficit detected. Battery will be exhausted before reaching destination. Mandatory stop at recommended charger.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FORMULA 9 & 10 -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 9 &amp; 10: Destination Arrival SoC &amp; Congestion Index</span>
+      <span class="badge">Telematics</span>
+    </div>
+    <div class="formula-box">
+      Arrival_SoC (%) = max( 0, [ (E_usable - E_demand) / C_pack ] × 100 )
+      <div class="formula-sub">Predicted Destination Battery Percentage upon trip completion</div>
+    </div>
+    <div class="formula-box" style="margin-top: 6px;">
+      Congestion_Ratio (CR) = ( T_live - T_free_flow ) / T_free_flow
+      <div class="formula-sub">Where: CR ≤ 0.10: Low Traffic | 0.10 &lt; CR ≤ 0.35: Moderate Urban | CR &gt; 0.35: Heavy Congestion</div>
+    </div>
+  </div>
+
+  <!-- FORMULA 11: EMERGENCY SOS TRIGGER -->
+  <div class="card">
+    <div class="card-title">
+      <span>Formula 11: Emergency Zero-SoC Autonomous Watchdog</span>
+      <span class="badge" style="background: #ffe4e6; color: #be123c;">Safety Critical</span>
+    </div>
+    <p>
+      The background telemetry daemon monitors real-time battery voltage and State of Charge every 3 seconds:
+    </p>
+    <div class="formula-box" style="border-left-color: #e11d48; background: #fff1f2; color: #9f1239;">
+      TRIGGER: &nbsp; ( SoC ≤ 0% ) &nbsp; OR &nbsp; ( Battery_Temperature ≥ 55°C )
+      <div class="formula-sub" style="color: #881337;">Autonomous dispatch of GPS Distress Payload via WhatsApp Direct API &amp; SMS Gateway</div>
+    </div>
+  </div>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <h2>5. Step-by-Step Worked Engineering Example</h2>
+  <div class="card">
+    <div class="card-title">
+      <span>Operational Profile: Mahindra Treo E-Rickshaw in Varanasi Corridor</span>
+      <span class="badge badge-primary">Case Study</span>
+    </div>
+
+    <div class="example-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Given Vehicle Baseline Specifications:</strong><br>
+        Pack Capacity: <span class="step-val">7,370 Wh (51.2V, 144Ah LFP)</span> | Lab Efficiency: <span class="step-val">78.0 Wh/km</span> | Live SoC: <span class="step-val">64%</span> | Temp: <span class="step-val">34.5°C</span>
+      </div>
+    </div>
+
+    <div class="example-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Calculate Usable Energy (E_usable):</strong><br>
+        <code>7,370 Wh × (64 ÷ 100) × 0.90</code> = <span class="step-val">4,245.12 Wh ≈ 4,245 Wh</span> available.
+      </div>
+    </div>
+
+    <div class="example-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Evaluate Dynamic Consumption Multipliers:</strong><br>
+        Normal Load (1.00×) • Temp 34.5°C (1.00×) • Flat Terrain (1.00×) • Moderate Traffic (1.08×)<br>
+        <code>C_adj = 78.0 × 1.00 × 1.00 × 1.00 × 1.08</code> = <span class="step-val">84.2 Wh/km</span>
+      </div>
+    </div>
+
+    <div class="example-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Compute Usable Range &amp; Uncertainty Band:</strong><br>
+        Nominal Range: <code>4,245 Wh ÷ 84.2 Wh/km</code> = <span class="step-val">50.4 km</span><br>
+        Conservative Lower Bound: <code>50.4 × 0.85</code> = <span class="step-val">42.8 km</span> | Favorable Upper Bound: <code>50.4 × 1.15</code> = <span class="step-val">58.0 km</span>
+      </div>
+    </div>
+
+    <div class="example-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <strong>Planned Corridor: IIT BHU Aryabhatta Hostel → Bhullanpur Varanasi (4.1 km):</strong><br>
+        Route Energy Demand: <code>4.1 km × 84.2 Wh/km (with safety headroom)</code> = <span class="step-val">598 Wh</span><br>
+        Safety Reserve Buffer (15%): <code>4,245 Wh × 0.15</code> = <span class="step-val">637 Wh</span><br>
+        Total Energy Requirement: <code>598 Wh + 637 Wh</code> = <span class="step-val">1,235 Wh</span>
+      </div>
+    </div>
+
+    <div class="example-step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <strong>Reachability Verdict &amp; Destination Battery Percentage:</strong><br>
+        Feasibility Comparison: <span class="step-val">1,235 Wh required &lt; 4,245 Wh available</span> → <strong style="color: #16a34a;">LIKELY FEASIBLE</strong><br>
+        Remaining Battery at Destination: <code>4,245 Wh - 598 Wh = 3,647 Wh</code><br>
+        Arrival SoC: <code>(3,647 Wh ÷ 7,370 Wh) × 100</code> = <span class="step-val">49.48% ≈ 49% SoC</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>6. Implementation Code Mapping</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Service Module</th>
+        <th>File Path</th>
+        <th>Core Methods &amp; Responsibilities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Range Estimation Service</strong></td>
+        <td><code>backend/services/rangeEstimationService.js</code></td>
+        <td><code>estimateRange()</code>, <code>evaluateTripFeasibility()</code></td>
+      </tr>
+      <tr>
+        <td><strong>Route &amp; Traffic Engine</strong></td>
+        <td><code>backend/services/routeService.js</code></td>
+        <td><code>getDrivingRoute()</code>, TomTom Traffic API, OSRM Polyline generator</td>
+      </tr>
+      <tr>
+        <td><strong>Trip Service</strong></td>
+        <td><code>backend/services/tripService.js</code></td>
+        <td><code>planTrip()</code>, Candidate corridor comparison, Feasibility verdicts</td>
+      </tr>
+      <tr>
+        <td><strong>Emergency SOS Service</strong></td>
+        <td><code>backend/services/emergencyService.js</code></td>
+        <td><code>triggerEmergency()</code>, Zero-SoC watchdog, WhatsApp link generator</td>
+      </tr>
+      <tr>
+        <td><strong>Hazard Engine</strong></td>
+        <td><code>backend/services/hazardService.js</code></td>
+        <td><code>getNearbyHazards()</code>, Spatial Haversine radius queries</td>
+      </tr>
+      <tr>
+        <td><strong>Dashboard UI Modal</strong></td>
+        <td><code>frontend/src/components/Dashboard.jsx</code></td>
+        <td>Usable Range card, Confidence Badge, Formula Breakdown modal</td>
+      </tr>
+      <tr>
+        <td><strong>Trip Planner UI Modal</strong></td>
+        <td><code>frontend/src/components/PlanTrip.jsx</code></td>
+        <td>Demand Formula modal, Sticky Map Matrix, Feasibility Verdict card</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer-note">
+    E-Rakshak EV Safety Copilot — Comprehensive Systems Architecture &amp; Glass-Box Energy Models Specification Document
+  </div>
+
+</body>
+</html>

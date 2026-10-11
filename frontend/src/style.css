@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-200 font-sans min-h-screen;
+    letter-spacing: -0.01em;
+  }
+
+  /* Dark mode default / applied */
+  html.dark body {
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, #1e1e24 0%, #09090b 60%, #000000 100%);
+    background-attachment: fixed;
+    color: #f4f4f6;
+  }
+
+  /* Light mode: clean Adidas off-white gradient */
+  html:not(.dark) body {
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, #fcfcfd 0%, #f4f4f6 50%, #e6e6e9 100%);
+    background-attachment: fixed;
+    color: #111114;
+  }
+}
+
+/* Off-white Adidas-style subtle monochrome utilities */
+.bg-offwhite-panel {
+  background: #f4f4f6;
+  color: #111114;
+}
+
+/* Custom sleek monochrome scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+html.dark ::-webkit-scrollbar-track {
+  background: #000000;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 2px;
+}
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: #e8e8ea;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #a1a1aa;
+  border-radius: 2px;
+}
+
+/* Leaflet dark/light mode overrides */
+html.dark .leaflet-container {
+  background-color: #09090b !important;
+}
+html.dark .leaflet-popup-content-wrapper {
+  background-color: #09090b !important;
+  color: #f4f4f6 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8) !important;
+}
+html.dark .leaflet-popup-tip {
+  background-color: #09090b !important;
+}
+
+html:not(.dark) .leaflet-container {
+  background-color: #f4f4f6 !important;
+}
+html:not(.dark) .leaflet-popup-content-wrapper {
+  background-color: #ffffff !important;
+  color: #111114 !important;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+}
+html:not(.dark) .leaflet-popup-tip {
+  background-color: #ffffff !important;
+}
+
+/* Ensure Leaflet controls and tiles stay below sticky navbar (z-50) and modals */
+.leaflet-container {
+  z-index: 0 !important;
+}
+.leaflet-pane {
+  z-index: 10 !important;
+}
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 20 !important;
+}
