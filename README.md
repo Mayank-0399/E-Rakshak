@@ -1,112 +1,214 @@
-# EV Safety Copilot — Smart Mobility Decision Support Web Application
+# E-Rakshak
 
-> **Smart Mobility Hackathon MVP** built strictly according to [`architecture.md`](./architecture.md).  
-> Designed for **E-rickshaw, E-scooter, and E-cycle riders** to turn available EV, trip, and map data into understandable range estimates, reachable charging recommendations, and preventive safety alerts.
+E-Rakshak is a smart EV mobility dashboard for e-rickshaw, e-scooter, and e-cycle riders. It combines battery telemetry, trip planning, charging guidance, safety alerts, and emergency assistance into a single app.
 
----
-
-## 🌟 Tech Stack
-
-- **Frontend:** React 18, Tailwind CSS, Lucide Icons, Leaflet Maps
-- **Backend:** Node.js, Express REST API (`/api/v1`)
-- **Architecture Compliance:** Baseline deterministic energy calculation, explicit uncertainty bands (`[lower - upper km]`), zero false-safe target, and structured 4-part alerts.
+This project is built as a React frontend with a Node.js + Express backend. The backend contains mock EV data and routing logic, and the frontend consumes the REST API under `/api/v1`.
 
 ---
 
-## 🚀 Live Servers & Ports
+## What this app does
 
-- **Unified Production Web App:** `http://localhost:5000` (Express serves both REST APIs and built React app)
-- **Vite React Dev Server:** `http://localhost:5173` (Hot Module Reload with `/api` proxy to port 5000)
+The code in this repo supports:
+
+- Rider dashboard with battery health, temperature, SoC, voltage, current, and range prediction
+- Vehicle selection for different EV classes
+- Trip estimation and route planning for Delhi-NCR style trips
+- Charging station filtering and charger recommendations
+- Road hazard reporting and nearby hazard lookup
+- Safety alerts and acknowledgment/feedback flow
+- SOS and emergency contact logic
+- Settings and privacy controls
+- Trip history and metrics for the current session
+
+This is a working MVP, not a production-grade deployment. It relies on in-memory mock data and local simulation rather than a real database or live vehicle connection.
 
 ---
 
-## 🛠️ How to Run Locally
+## Tech stack
 
-### 1. Backend Server (Node.js + Express)
+Frontend
+- React 18
+- Vite
+- Tailwind CSS
+- Leaflet + map UI
+- Lucide icons
+
+Backend
+- Node.js
+- Express
+- dotenv
+- CORS
+- morgan
+
+Architecture note
+- The backend loads a mock database from `backend/data/mockDatabase.js`
+- Services are organized under `backend/services/`
+- API routes are defined in `backend/server.js`
+- The frontend is built with Vite and proxies `/api` calls to the backend
+
+---
+
+## Local run instructions
+
+### 1. Install backend dependencies
+
 ```bash
-cd backend
+cd C:\Users\mayan\OneDrive\Desktop\E-Rakshak\backend
 npm install
-npm run dev # or npm start
-# Backend runs on http://localhost:5000
 ```
 
-### 2. Frontend Application (React + Tailwind CSS)
+### 2. Install frontend dependencies
+
 ```bash
-cd frontend
+cd C:\Users\mayan\OneDrive\Desktop\E-Rakshak\frontend
 npm install
-npm run dev
-# Vite dev server runs on http://localhost:5173
 ```
 
-### 3. Route API Key
+### 3. Configure environment variables
 
-Add your route key to the root `.env` file:
+The backend loads environment variables from:
+- `backend/.env`
+- or the project root `.env`
+
+Add the route key if you want live routing/geocoding features to work:
 
 ```env
 ROUTE_API_KEY=your_route_api_key_here
 ```
 
-The backend also supports `backend/.env` if you prefer keeping server variables inside the backend folder. Restart the backend after changing `.env`.
+The code calls `dotenv.config({ path: path.join(__dirname, '.env') });` and then `dotenv.config({ path: path.join(__dirname, '../.env') });`, so either location is accepted.
+
+### 4. Start the backend
+
+```bash
+cd C:\Users\mayan\OneDrive\Desktop\E-Rakshak\backend
+npm run dev
+```
+
+The backend runs on:
+
+```text
+http://localhost:5001
+```
+
+### 5. Start the frontend
+
+```bash
+cd C:\Users\mayan\OneDrive\Desktop\E-Rakshak\frontend
+npm run dev
+```
+
+The frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+The frontend Vite config proxies `/api` requests to `http://localhost:5001`.
 
 ---
 
-## 📱 Core Implemented Modules
+## Production-like mode
 
-### 1. 🎛️ Rider Dashboard
-- **Usable Range with Uncertainty Interval:** Displays estimated remaining range with explicit confidence margins (e.g. `50.4 km [42.8 - 58.0 km]`).
-- **Battery State of Charge (SoC):** Visual progress gauge, pack voltage (V), and motor current (A).
-- **Thermal & Health Diagnostics:** Color-coded temperature warning (Optimal <42°C, Caution 45-52°C, Critical >55°C).
-- **Interactive Telemetry Simulator:** Quick buttons to test live scenarios:
-  - *Normal Baseline (68%)*
-  - *Low Battery Caution (8%)*
-  - *Thermal Overheat (56.5°C)*
-  - *Overloaded Weight Payload*
-  - Live sliders for SoC and temperature.
-- **System Status Pill:** `OK`, `Caution`, or `Action Recommended`.
+If you want to run the app as a single served build:
 
-### 2. 🗺️ Plan Trip (Destination Reachability)
-- **Preset Mobility Corridors:** Tested for urban routes (e.g., Connaught Place to Karol Bagh, Kashmere Gate to Noida, Delhi Ridge).
-- **Deterministic Energy Feasibility Engine:**
-  - `Likely Feasible` (Green)
-  - `Uncertain / Tight Buffer` (Amber)
-  - `Not Recommended` (Red)
-- **Energy Demand Breakdown:** Required Wh, 15% safety reserve Wh, and remaining arrival battery percentage.
-- **Interactive Leaflet Route Map:** Visualizes origin marker, destination marker, route polyline, and on-route road hazards.
-- **Simulation Drive Playback:** Live simulation of a driving trip with real-time battery drain, automatically logging the outcome to trip history!
+```bash
+cd C:\Users\mayan\OneDrive\Desktop\E-Rakshak\frontend
+npm run build
+```
 
-### 3. ⚡ Smart Charging & Swap Hubs
-- **Compatibility & Reachability Filtering:** Filters stations by vehicle connector (`15A 3-pin`, `Type 2`, `CCS2`, `Sun Mobility Battery Swap`).
-- **Reachability Tagging:** Computes whether station is reachable with 15% safety reserve.
-- **Station Cards:** Detour distance (km), charging rate (kW), pricing (₹/kWh), available slots, and direct Google Maps navigation link.
-- **Interactive Map:** Color-coded charging station pins.
+Then start the backend:
 
-### 4. 🚨 Preventive Safety & Vehicle Alerts
-- **Deterministic Safety Engine:** Separate from language generation; strictly evaluates verified sensor limits.
-- **4-Part Explainability Format:**
-  1. **Issue Detected**
-  2. **Why It Matters**
-  3. **Confidence & Data Source**
-  4. **Recommended Next Action**
-- **User Acknowledgement & Feedback:** "Was this helpful?" feedback collection.
-- **Battery Protocol Guide:** Emergency cooling and cell maintenance instructions.
+```bash
+cd C:\Users\mayan\OneDrive\Desktop\E-Rakshak\backend
+npm start
+```
 
-### 5. ⚠️ Road Hazard Intelligence
-- **Crowdsourced Hazard Map:** Waterlogging, potholes, road construction, and charger defects.
-- **Submit Hazard Modal:** Allows riders to broadcast hazards with GPS coordinates and severity.
-- **Community Verification:** Upvote mechanism to confirm active hazards.
+The backend serves static files from `frontend/dist` and falls back to `index.html` for all non-API routes.
 
-### 6. 🆘 One-Tap Emergency Assistance (SOS)
-- **One-Tap SOS Dispatch:** Formats current GPS coordinates, battery SoC, and temperature.
-- **Direct Dispatch Links:** One-click sharing via **WhatsApp** and **SMS** to pre-configured trusted contact.
-- **Nearby Recovery Hubs:** Verified mechanics, EV puncture fix, battery swap, and flatbed towing contacts.
-- **Emergency Protocols:** Step-by-step guidance for battery hissing/smoke, waterlogging, and stalled vehicles.
+---
 
-### 7. 📊 Trip History & Accuracy Auditing
-- **Predicted vs Observed Consumption:** Compares predicted Wh with actual Wh.
-- **Mean Absolute Error (MAE %):** Deviation tracking across journeys.
-- **False-Safe Rate Tracking:** Audits critical metric defined in Section 14 to verify safety guarantees.
+## Important notes from the actual code
 
-### 8. ⚙️ Vehicle Profiles & Settings
-- **Vehicle Fleet Profiles:** Switch between **Mahindra Treo (E-Rickshaw)**, **Ather 450X (E-Scooter)**, **Hero Lectro (E-Cycle)**, or add a Custom EV.
-- **Configurable Safety Reserve:** Adjustable safety buffer slider (10% to 30%).
-- **Privacy by Design:** One-click **"Wipe Stored History & Location"** button to purge stored traces.
+1. The project uses port 5001, not 5000.
+   - `backend/server.js` sets `const PORT = process.env.PORT || 5001;`
+   - `frontend/vite.config.js` proxies `/api` to `http://localhost:5001`
+
+2. The backend is intentionally mock-backed.
+   - `backend/data/mockDatabase.js` seeds vehicles, telemetry, charging stations, hazards, trips, and user settings in memory
+   - No database like MongoDB, PostgreSQL, or MySQL is configured in the repo
+
+3. The app includes many endpoints under `/api/v1`.
+   - Dashboard, vehicles, telemetry, trip planning, emergency, hazards, settings, and charging APIs are present in `backend/server.js`
+
+4. The app is designed for a demo or hackathon scenario.
+   - It simulates EV behavior and route scenarios rather than connecting to production hardware or real fleet APIs
+
+5. Some features depend on external route data.
+   - `ROUTE_API_KEY` is used for route/geocoding services as seen in the backend route logic
+
+---
+
+## Main API modules
+
+The backend exposes API groups such as:
+
+- `/api/v1/dashboard` — current vehicle health and range
+- `/api/v1/vehicles` — list and switch active vehicle
+- `/api/v1/telemetry` — update/simulate telemetry
+- `/api/v1/range/predict` — estimate driving range
+- `/api/v1/trips` and `/api/v1/trips/estimate` — trip scoring and history
+- `/api/v1/charging-stations/nearby` — nearby charging stations
+- `/api/v1/hazards` — hazard reporting and voting
+- `/api/v1/alerts` — safety alerts and feedback
+- `/api/v1/emergency` — SOS and emergency contacts
+- `/api/v1/settings` — privacy and user settings
+
+Health check:
+
+```bash
+curl http://localhost:5001/api/health
+```
+
+---
+
+## Project structure
+
+```text
+E-Rakshak/
+├── backend/
+│   ├── data/
+│   ├── services/
+│   ├── .env.example (if added later)
+│   ├── package.json
+│   ├── server.js
+│   └── ...
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   ├── vite.config.js
+│   └── ...
+├── README.md
+├── architecture.md
+├── FORMULAS_AND_ARCHITECTURE.md
+├── TRIP_PLANNER_SETUP.md
+└── ...
+```
+
+---
+
+## Summary
+
+This project is a local EV rider safety and trip-planning demo. The frontend is a Vite React app, the backend is a mock Express API, and the app runs locally with:
+
+- Backend: `http://localhost:5001`
+- Frontend: `http://localhost:5173`
+
+If you run both and open the frontend, you get a working EV dashboard with simulated telemetry, trip planning, charging recommendations, hazards, and emergency workflows.
