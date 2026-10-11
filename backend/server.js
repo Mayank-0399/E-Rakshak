@@ -521,5 +521,5 @@ app.get("*", (req, res, next) => {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`⚡ E-Rakshak Backend running on http://localhost:${PORT}`);
+  console.log(`⚡ E-Rakshak Backend listening on port ${PORT}`);
 });

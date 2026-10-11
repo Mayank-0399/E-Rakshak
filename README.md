@@ -196,7 +196,7 @@ E-Rakshak Project Structure
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/apoorvrajawat/E-Rakshak.git
+git clone https://github.com/Mayank-0399/E-Rakshak.git
 cd E-Rakshak
 ```
 
@@ -206,7 +206,7 @@ Create or verify `backend/.env`:
 PORT=5001
 TOMTOM_API_KEY=your_tomtom_api_key_here
 ```
-*(A working TomTom key is provided for testing real-time Indian traffic, geocoding, and EV station search).*
+Add your own TomTom API key to enable live traffic, geocoding, and EV station search.
 
 ### Step 3: Install & Start Backend
 ```bash
@@ -216,17 +216,36 @@ npm run dev
 ```
 The backend will launch on `http://localhost:5001`. You should see:
 ```
-⚡ E-Rakshak Backend running on http://localhost:5001
+⚡ E-Rakshak Backend listening on port 5001
 ```
 
 ### Step 4: Install & Start Frontend
-In a new terminal window:
+In a new terminal window, create `frontend/.env.local` and set the backend URL for Vite's development proxy:
+```env
+VITE_API_PROXY_TARGET=http://localhost:5001
+```
+
+Then start the frontend:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 The web app will be available at **`http://localhost:5173/`**.
+
+---
+
+## ☁️ Deploy to Render
+
+This repository includes a `render.yaml` Blueprint for deploying the frontend and backend together as one Render web service. The backend serves the built frontend and API from the same origin, so no production `localhost` or frontend API URL is needed.
+
+1. Push the repository and `render.yaml` to GitHub.
+2. In Render, choose **New + → Blueprint** and connect `Mayank-0399/E-Rakshak`.
+3. Review the `e-rakshak` web service. Set `TOMTOM_API_KEY` to your own TomTom key when prompted; do not commit API keys to GitHub.
+4. Choose **Apply** to build and deploy. Render uses the build and start commands in `render.yaml` and the `/api/health` endpoint for health checks.
+5. Open the service's `onrender.com` URL. The frontend and `/api` endpoints will use that same URL.
+
+The service runs `npm ci` for both applications, builds the Vite frontend, and starts the Express backend. Subsequent pushes to the connected branch trigger automatic deploys. You can verify the backend at `<your-render-url>/api/health`.
 
 ---
 

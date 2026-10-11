@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: e-rakshak
+    runtime: node
+    buildCommand: npm ci --prefix backend && npm ci --prefix frontend && npm run build --prefix frontend
+    startCommand: npm start --prefix backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: TOMTOM_API_KEY
+        sync: false
